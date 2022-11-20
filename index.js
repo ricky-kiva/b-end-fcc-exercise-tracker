@@ -70,6 +70,11 @@ app.get('/api/users', function(req,res) {
 app.post('/api/users/:_id/exercises', function(req,res) {
   let paramId = req.params._id
   let dateNew = new Date(req.body.date)
+
+  if (dateNew == "Invalid Date") {
+    dateNew = new Date();
+  }
+  
   let intDura = parseInt(req.body.duration)
 
   Users.findOne({_id: paramId})
