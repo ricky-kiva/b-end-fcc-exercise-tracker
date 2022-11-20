@@ -109,66 +109,75 @@ app.get('/api/users/:_id/logs', function(req,res) {
   let logFrom =  req.query.from;
   let logTo = req.query.to;
   let logLim = req.query.limit;
+
+  Users.findOne({user_id: req.params._id})
+    .then(userObj => {
+      Exercises.find({user_id: req.params._id})
+        .sort({date: 1})
+        .exec()
+        .then(data => {
+          
+          for (let i = 0; i < data.length; i++) {
+            arrLog.push({
+              description: String(data[i]['description']),
+              duration: parseInt(data[i]['duration']),
+              date: (data[i]['date']).toDateString()
+            })
+          }
     
-  Exercises.find({user_id: req.params._id})
-    .sort({date: 1})
-    .exec()
-    .then(data => {
-      
-      for (let i = 0; i < data.length; i++) {
-        arrLog.push({
-          description: data[i]['description'],
-          duration: data[i]['duration'],
-          date: (data[i]['date']).toDateString()
+          if (!logFrom && !logTo) {
+            if (!logLim) {
+              logLim = arrLog.length
+            }
+            for (let i = 0; i < logLim; i++) {
+              arrLogFilter.push(arrLog[i]);
+            }
+          }
+
+
+    
+          if (logFrom || logTo) {
+            if (!logFrom) {
+              logFrom = 0;
+            } else {
+              logFrom = Date.parse(logFrom)
+            }
+            if (!logTo) {
+              let logToday = new Date();
+              logTo = logToday.toDateString();
+              logTo = Date.parse(logTo);
+            } else {
+              logTo = Date.parse(logTo)
+            }
+
+          console.log(logFrom)
+          console.log(logTo)
+            
+            for (let i = 0; i < arrLog.length; i++) {
+              logDate = Date.parse(arrLog[i]['date'])
+              if (logDate >= logFrom && logDate <= logTo) {
+                arrLogFilter.push(arrLog[i]);
+              }
+              if (logLim && logLim == i+1) {
+                break;
+              }
+            }
+          }
+          res.json({
+            _id: req.params._id,
+            username: userObj['username'],
+            from: "",
+            to: "",
+            count: arrLogFilter.length,
+            log: arrLogFilter
+          })
         })
-      }
-
-      if (!logFrom && !logTo) {
-        if (!logLim) {
-          logLim = arrLog.length
-        }
-        for (let i = 0; i < logLim; i++) {
-          arrLogFilter.push(arrLog[i]);
-        }
-      }
-
-      if (logFrom || logTo) {
-        if (!logFrom) {
-          logFrom = 0;
-        } else {
-          logFrom = Date.parse(logFrom)
-        }
-        if (!logTo) {
-          let logToday = new Date();
-          logTo = logToday.toDateString();
-          logTo = Date.parse(logTo);
-        } else {
-          logTo = Date.parse(logTo)
-        }
-        
-        for (let i = 0; i < arrLog.length; i++) {
-          logDate = Date.parse(arrLog[i]['date'])
-          if (logDate >= logFrom && logDate <= logTo) {
-            arrLogFilter.push(arrLog[i]);
-          }
-          if (logLim && logLim == i+1) {
-            break;
-          }
-        }
-      }
+        .catch(err => {
+          console.error(err)
+        })
     })
     .catch(err => {
       console.error(err)
-    })
-
-  Users.findOne({_id: req.params._id})
-    .then(data => {
-      res.json({
-        _id: data['_id'],
-        username: data['username'],
-        count: arrLogFilter.length,
-        log: arrLogFilter
-      })
     })
 })
 
