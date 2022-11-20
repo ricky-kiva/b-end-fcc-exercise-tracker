@@ -111,6 +111,8 @@ app.get('/api/users/:_id/logs', function(req,res) {
   let logLim = req.query.limit;
     
   Exercises.find({user_id: req.params._id})
+    .sort({date: 1})
+    .exec()
     .then(data => {
       
       for (let i = 0; i < data.length; i++) {
@@ -119,6 +121,15 @@ app.get('/api/users/:_id/logs', function(req,res) {
           duration: data[i]['duration'],
           date: (data[i]['date']).toDateString()
         })
+      }
+
+      if (!logFrom && !logTo) {
+        if (!logLim) {
+          logLim = arrLog.length
+        }
+        for (let i = 0; i < logLim; i++) {
+          arrLogFilter.push(arrLog[i]);
+        }
       }
 
       if (logFrom || logTo) {
@@ -144,18 +155,19 @@ app.get('/api/users/:_id/logs', function(req,res) {
             break;
           }
         }
-        return res.json({
-          log: arrLogFilter
-        })
       }
-      
       res.json({
-        log: arrLog
+        log: arrLogFilter
       })
     })
     .catch(err => {
       console.error(err)
     })
+
+  /*Users.findOne({_id: req.params._id})
+    .then(data => {
+      
+    })*/
 })
 
 // GET try to find name and sort by ids
