@@ -156,34 +156,21 @@ app.get('/api/users/:_id/logs', function(req,res) {
           }
         }
       }
+    })
+    .catch(err => {
+      console.error(err)
+    })
+
+  Users.findOne({_id: req.params._id})
+    .then(data => {
       res.json({
+        _id: data['_id'],
+        username: data['username'],
+        count: arrLogFilter.length,
         log: arrLogFilter
       })
     })
-    .catch(err => {
-      console.error(err)
-    })
-
-  /*Users.findOne({_id: req.params._id})
-    .then(data => {
-      
-    })*/
 })
-
-// GET try to find name and sort by ids
-/*app.get('/username/:name', function(req,res) {
-  let name = req.params.name
-  Users.find({username: name})
-    .sort({_id: 1})
-    .exec()
-    .then(data => {
-      res.json(data)
-    })
-    .catch(err => {
-      console.error(err)
-    })
-})*/
-
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
