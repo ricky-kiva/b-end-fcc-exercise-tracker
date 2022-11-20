@@ -102,6 +102,28 @@ app.post('/api/users/:_id/exercises', function(req,res) {
     })
   
 })
+
+// GET all exercise from user
+app.get('/api/users/:_id/logs', function(req,res) {
+  const arrLog = []
+  Exercises.find({user_id: req.params._id})
+    .then(data => {
+      for (let i = 0; i < data.length; i++) {
+        arrLog.push({
+          description: data[i]['description'],
+          duration: data[i]['duration'],
+          date: data[i]['date']
+        })
+      }
+      res.json({
+        log: arrLog
+      })
+    })
+    .catch(err => {
+      console.error(err)
+    })
+})
+
 // GET try to find name and sort by ids
 /*app.get('/username/:name', function(req,res) {
   let name = req.params.name
