@@ -36,7 +36,7 @@ let ExerciseSchema = new mongoose.Schema({
     required: true
   },
   date: {
-    type: String
+    type: Date
   }
 })
 
@@ -79,11 +79,10 @@ app.post('/api/users/:_id/exercises', function(req,res) {
 
   Users.findOne({_id: paramId})
     .then(users => {
-      let dateString = dateNew.toDateString();
 
       let newExercise = {
         user_id: paramId,
-        date: dateString,
+        date: dateNew,
         duration: intDura,
         description: req.body.description
       }
@@ -95,7 +94,7 @@ app.post('/api/users/:_id/exercises', function(req,res) {
       res.json({
         _id: users['_id'],
         username: users['username'],
-        date: dateString,
+        date: dateNew.toDateString(),
         duration: intDura,
         description: req.body.description
       });
@@ -106,15 +105,50 @@ app.post('/api/users/:_id/exercises', function(req,res) {
 // GET all exercise from user
 app.get('/api/users/:_id/logs', function(req,res) {
   const arrLog = []
+  const arrLogFilter = []
+  let logFrom =  req.query.from;
+  let logTo = req.query.to;
+  let logLim = req.query.limit;
+    
   Exercises.find({user_id: req.params._id})
     .then(data => {
+      
       for (let i = 0; i < data.length; i++) {
         arrLog.push({
           description: data[i]['description'],
           duration: data[i]['duration'],
-          date: data[i]['date']
+          date: (data[i]['date']).toDateString()
         })
       }
+
+      if (logFrom || logTo) {
+        if (!logFrom) {
+          logFrom = 0;
+        } else {
+          logFrom = Date.parse(logFrom)
+        }
+        if (!logTo) {
+          let logToday = new Date();
+          logTo = logToday.toDateString();
+          logTo = Date.parse(logTo);
+        } else {
+          logTo = Date.parse(logTo)
+        }
+        
+        for (let i = 0; i < arrLog.length; i++) {
+          logDate = Date.parse(arrLog[i]['date'])
+          if (logDate >= logFrom && logDate <= logTo) {
+            arrLogFilter.push(arrLog[i]);
+          }
+          if (logLim && logLim == i+1) {
+            break;
+          }
+        }
+        return res.json({
+          log: arrLogFilter
+        })
+      }
+      
       res.json({
         log: arrLog
       })
