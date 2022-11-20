@@ -155,7 +155,7 @@ app.get('/api/users/:_id/logs', function(req,res) {
               if (logDate >= logFrom && logDate <= logTo) {
                 arrLogFilter.push(arrLog[i]);
               }
-              if (logLim && logLim == i+1) {
+              if (logLim && logLim == (arrLogFilter.length)) {
                 break;
               }
             }
