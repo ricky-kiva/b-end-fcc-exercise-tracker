@@ -106,6 +106,8 @@ app.post('/api/users/:_id/exercises', function(req,res) {
 app.get('/api/users/:_id/logs', function(req,res) {
   const arrLog = []
   const arrLogFilter = []
+  let sendDateFrom; 
+  let sendDateTo;
   let logFrom =  req.query.from;
   let logTo = req.query.to;
   let logLim = req.query.limit;
@@ -134,8 +136,6 @@ app.get('/api/users/:_id/logs', function(req,res) {
             }
           }
 
-
-    
           if (logFrom || logTo) {
             if (!logFrom) {
               logFrom = 0;
@@ -149,9 +149,6 @@ app.get('/api/users/:_id/logs', function(req,res) {
             } else {
               logTo = Date.parse(logTo)
             }
-
-          console.log(logFrom)
-          console.log(logTo)
             
             for (let i = 0; i < arrLog.length; i++) {
               logDate = Date.parse(arrLog[i]['date'])
@@ -163,11 +160,21 @@ app.get('/api/users/:_id/logs', function(req,res) {
               }
             }
           }
+          
+          if (req.query.from) {
+            logFrom = new Date(req.query.from)
+            sendDateFrom = logFrom.toDateString()
+          }
+          if (req.query.to) {
+            logTo = new Date(req.query.to)
+            sendDateTo = logTo.toDateString()
+          }
+          
           res.json({
             _id: req.params._id,
             username: userObj['username'],
-            from: "",
-            to: "",
+            from: sendDateFrom,
+            to: sendDateTo,
             count: arrLogFilter.length,
             log: arrLogFilter
           })
